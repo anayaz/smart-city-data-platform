@@ -56,4 +56,4 @@ jobs:
       - name: Run tests
         env:
           POSTGRES_PASSWORD: test_password
-        run: python -m pytest -v
+        run: python -m pytest tests/ -v
