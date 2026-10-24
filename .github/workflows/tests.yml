@@ -1,0 +1,59 @@
+name: Python Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: urban_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: urban_analytics
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U urban_user -d urban_analytics"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-api.txt pytest httpx
+
+      - name: Create test database table
+        env:
+          PGPASSWORD: test_password
+        run: |
+          psql -h localhost -U urban_user -d urban_analytics -c "
+          CREATE TABLE weather_observations (
+              observation_id SERIAL PRIMARY KEY,
+              city VARCHAR(100) NOT NULL,
+              observed_at TIMESTAMP NOT NULL,
+              temperature_c DOUBLE PRECISION,
+              humidity_percent INTEGER,
+              UNIQUE (city, observed_at)
+          );
+          INSERT INTO weather_observations
+              (city, observed_at, temperature_c, humidity_percent)
+          VALUES ('Berlin', NOW(), 11.1, 66);
+          "
+
+      - name: Run tests
+        env:
+          POSTGRES_PASSWORD: test_password
+        run: python -m pytest -v

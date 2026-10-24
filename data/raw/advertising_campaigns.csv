@@ -1,0 +1,9 @@
+location_id,advertiser,budget,start_date
+1,Mercedes,18000,2026-10-01
+2,Nike,9500,2026-10-05
+3,Amazon,22000,2026-10-10
+5,Spotify,6500,2026-10-15
+1,Netflix,12500,2026-10-20
+2,Adidas,-5000,2026-10-12
+3,Puma,8000,invalid_date
+1,Netflix,12500,2026-10-20
